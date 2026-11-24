@@ -17,7 +17,7 @@ Grade: PK, K or 1–12. Year: `2023-24` or `2024`. Level: ACCESS for ELLs Overal
 ## Method
 For each pair of consecutive years: `change ~ grade entered + prior level + prior level² + school year` (ordinary least squares). A student's conditional growth is the mean residual across their year pairs. Students whose mean residual falls below a chosen number of residual standard deviations (default −1.0) are marked "below expected."
 
-Validated against the analysis code of Vieytes Cichero (under review): on the same records it reproduces the published model exactly (572 changes, R² = .366).
+Validated against the analysis code of Vieytes Cichero (under review): on the same records it reproduces the model reported in the manuscript exactly (572 changes, R² = .366).
 
 ## Limits
 - Annual changes contain substantial measurement error; single-year results are least reliable.
