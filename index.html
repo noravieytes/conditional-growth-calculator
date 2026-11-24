@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Conditional Growth Calculator</title>
+<meta name="description" content="Free, open tool that compares each multilingual learner's year-to-year English proficiency change with the change expected for similar students. Runs entirely in your browser.">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* VOICE: a measurement instrument — exact, calm, honest about limits.
+   IDEA: an engineering datasheet for a school's own data: title strip, then dense aligned panels.
+   PICTURE: the live result — expected-change-by-grade bars and the flagged count, large, beside the controls.
+   COLOUR and TYPE: cobalt strip, white, black, pale cobalt zones; Space Grotesk + Inter.
+   LAYOUT: strip, then input column | results column, then the student table full width, then method and limits. */
+:root{color-scheme:light dark;--bg:light-dark(#fff,#0a0d18);--ink:light-dark(#0b0d12,#e9ecf5);--mut:light-dark(#4a5163,#a3abc2);--zone:light-dark(#eef2ff,#121a33);--line:light-dark(#d5dcf0,#25305a);--co:#1240e0;--co2:light-dark(#1240e0,#7d9bff);--warn:light-dark(#b42318,#ff8a7a);--warnbg:light-dark(#fdecea,#3a1612)}
+:root[data-theme=light]{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}
+*{box-sizing:border-box;min-width:0}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 Inter,system-ui,sans-serif;overflow-x:clip}
+h1,h2,h3,.num{font-family:"Space Grotesk",Inter,sans-serif}
+h1{font-size:clamp(28px,4vw,44px);line-height:1.05;margin:0 0 10px;text-wrap:balance;font-weight:700}
+h2{font-size:22px;line-height:1.2;margin:0 0 12px}
+h3{font-size:16px;margin:0 0 6px}
+p{margin:0 0 12px}a{color:var(--co2)}
+.strip{background:var(--co);color:#fff;padding:clamp(24px,4vw,48px) max(5vw,16px) clamp(20px,3vw,36px)}
+.strip p{max-width:68ch;color:#dbe4ff;margin:0}
+.strip .priv{display:inline-flex;gap:8px;align-items:center;margin-top:14px;background:#0b2bb0;padding:6px 12px;border-radius:999px;font-size:14px;color:#fff}
+.wrap{max-width:1240px;margin:0 auto}
+.band{padding:clamp(22px,3.5vw,48px) max(5vw,16px)}
+.grid{display:grid;grid-template-columns:minmax(0,340px) minmax(0,1fr);gap:28px;align-items:start}
+.panel{background:var(--zone);border:1px solid var(--line);border-radius:10px;padding:18px}
+label{display:block;font-size:14px;font-weight:600;margin:12px 0 4px}
+select,input[type=text],textarea{width:100%;font:16px Inter,sans-serif;padding:10px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink);min-height:44px}
+textarea{min-height:110px;font-size:14px;font-family:ui-monospace,Menlo,monospace}
+button{font:600 15px Inter,sans-serif;min-height:44px;padding:0 16px;border-radius:8px;border:1px solid var(--co2);background:var(--bg);color:var(--co2);cursor:pointer}
+button.pri{background:var(--co);color:#fff;border-color:var(--co)}
+button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-visible{outline:3px solid #f5b400;outline-offset:2px}
+.row{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.drop{border:2px dashed var(--line);border-radius:10px;padding:16px;text-align:center;background:var(--bg)}
+.drop.on{border-color:var(--co2)}
+.small{font-size:13px;color:var(--mut)}
+.kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-bottom:18px}
+.kpi{border-top:3px solid var(--ink);padding-top:8px}
+.kpi .num{font-size:clamp(26px,3.4vw,40px);font-weight:600;line-height:1.1;white-space:nowrap}
+.kpi.f{border-color:var(--warn)}.kpi.f .num{color:var(--warn)}
+.kpi div:last-child{font-size:13px;color:var(--mut)}
+.bars{display:grid;gap:6px}
+.bar{display:grid;grid-template-columns:3.2em minmax(0,1fr) 9.5em;gap:10px;align-items:center;font-size:14px}
+.track{position:relative;height:22px;background:var(--zone);border-radius:4px}
+.fill{position:absolute;top:0;bottom:0;left:0;background:var(--co2);border-radius:4px}
+.ci{position:absolute;top:9px;height:4px;background:var(--ink);opacity:.55}
+.ref{position:absolute;top:-3px;bottom:-3px;width:2px;background:var(--warn)}
+.bar .v{text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}
+.err{background:var(--warnbg);color:var(--warn);border-radius:8px;padding:10px 12px;margin-top:12px}
+table{border-collapse:collapse;width:100%;font-size:14px}
+th,td{padding:8px 10px;border-bottom:1px solid var(--line);text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}
+th:first-child,td:first-child{text-align:left}
+th{font-weight:600;cursor:pointer;user-select:none;position:sticky;top:0;background:var(--bg)}
+tr.flag td{background:var(--warnbg)}
+.tag{display:inline-block;font-size:12px;font-weight:600;padding:2px 8px;border-radius:999px;background:var(--warn);color:var(--bg)}
+.lo{color:var(--mut);font-size:12px}
+.scroll{overflow-x:auto;max-height:560px;overflow-y:auto;border:1px solid var(--line);border-radius:10px}
+.cols{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:24px}
+.cols p,.lim li{font-size:15px}
+.lim{padding-left:1.1em;margin:0}.lim li{margin-bottom:8px}
+details{margin-top:16px}summary{cursor:pointer;font-weight:600;min-height:44px;display:flex;align-items:center}
+pre,code{font-family:ui-monospace,Menlo,monospace;font-size:13px}pre{background:var(--zone);padding:12px;border-radius:8px;overflow-x:auto}
+.cite{background:var(--zone);border-left:4px solid var(--co2);padding:12px 14px;font-size:14px}
+footer{border-top:1px solid var(--line);font-size:13px;color:var(--mut)}
+#toast{min-height:20px;font-size:13px;color:var(--co2);margin-top:6px}
+@media(max-width:860px){.grid,.cols{grid-template-columns:minmax(0,1fr)}.kpis{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:520px){.bar{grid-template-columns:2.6em minmax(0,1fr) 6.5em}.bar .pct{display:none}}
+@media(prefers-reduced-motion:no-preference){.fill{transition:width .4s ease}}
+</style>
+</head>
+<body>
+<header class="strip"><div class="wrap">
+<h1>Conditional Growth Calculator</h1>
+<p>Compares each multilingual learner's year-to-year change in English language proficiency with the change typical for students in the same grade, at the same starting level, in the same year — estimated from your own district's data.</p>
+<span class="priv">Your file never leaves this browser. Nothing is uploaded or stored.</span>
+</div></header>
+
+<main>
+<section class="band"><div class="wrap grid">
+<div class="panel" aria-label="Data">
+<h2>1. Your data</h2>
+<div class="drop" id="drop"><p style="margin:0 0 8px">Drop a CSV file here, or</p>
+<input type="file" id="file" accept=".csv,.txt,.tsv" aria-label="Choose CSV file"></div>
+<label for="paste">Or paste rows</label>
+<textarea id="paste" placeholder="student_id,school_year,grade,overall_level&#10;S0001,2022-23,3,2.4&#10;S0001,2023-24,4,2.9"></textarea>
+<div class="row"><button class="pri" id="run">Calculate</button><button id="sample">Use sample data</button></div>
+<div id="mapbox" hidden>
+<h3 style="margin-top:18px">Columns</h3>
+<label for="c_id">Student ID</label><select id="c_id"></select>
+<label for="c_year">School year</label><select id="c_year"></select>
+<label for="c_grade">Grade</label><select id="c_grade"></select>
+<label for="c_level">Overall proficiency level (1.0–6.0)</label><select id="c_level"></select>
+</div>
+<div id="err"></div>
+<p class="small" style="margin-top:14px">One row per student per year. Grade can be PK, K or 1–12; years as 2023-24 or 2024. Use de-identified IDs.</p>
+</div>
+
+<div aria-live="polite">
+<h2>2. Results <span class="small" id="src"></span></h2>
+<div class="kpis">
+<div class="kpi"><div class="num" id="k_s">–</div><div>students with ≥1 year-to-year change</div></div>
+<div class="kpi"><div class="num" id="k_n">–</div><div>year-to-year changes analyzed</div></div>
+<div class="kpi"><div class="num" id="k_r">–</div><div>of change explained by grade, starting level and year</div></div>
+<div class="kpi f"><div class="num" id="k_f">–</div><div>growing below expectation at the chosen cut</div></div>
+</div>
+<h3>Average one-year change by grade entered</h3>
+<p class="small">Bar: mean change in levels. Black line: 95% interval. Red mark: 0.30 levels. Right: number of changes and share below 0.30.</p>
+<div class="bars" id="bars"></div>
+<label for="cut" style="margin-top:20px">Flag when a student's average difference from expected is below <span id="cutv">−1.0</span> standard deviations</label>
+<input type="range" id="cut" min="-2" max="-0.5" step="0.1" value="-1" style="width:100%;min-height:44px" aria-describedby="cutv">
+</div>
+</div></section>
+
+<section class="band" style="padding-top:0"><div class="wrap">
+<h2>3. Students, from lowest to highest growth relative to expectation</h2>
+<div class="row" style="margin:0 0 12px"><input type="text" id="q" placeholder="Find a student ID" style="max-width:260px" aria-label="Find a student ID"><button id="dl">Download CSV</button><button id="cp">Copy CSV</button><label style="display:flex;gap:8px;align-items:center;margin:0;font-weight:500"><input type="checkbox" id="onlyf" style="width:20px;height:20px"> Flagged only</label></div>
+<div id="toast"></div>
+<div class="scroll"><table id="tbl"><thead><tr>
+<th data-k="id">Student</th><th data-k="grade">Latest grade</th><th data-k="level">Latest level</th><th data-k="k">Changes</th><th data-k="lastDelta">Last change</th><th data-k="lastExp">Expected</th><th data-k="meanResid">Avg. difference</th><th data-k="z">SD units</th><th data-k="flag">Status</th>
+</tr></thead><tbody></tbody></table></div>
+<p class="small" style="margin-top:8px">Avg. difference: mean of (actual − expected) change across the student's year pairs, in proficiency levels. Students with one change are shown but are least reliable.</p>
+</div></section>
+
+<section class="band" style="background:var(--zone)"><div class="wrap">
+<h2>How it works</h2>
+<div class="cols">
+<div><h3>Expected change</h3><p>For every pair of consecutive years, the tool fits one regression on your data: change = grade entered + prior level + prior level² + school year. The prediction is the change typical for a student like this one; the residual is how far the student's actual change sat from it.</p></div>
+<div><h3>Why condition</h3><p>Raw gains on grade-relative proficiency scales shrink as students move up grades and levels. A fixed rule such as "less than 0.30 levels a year" therefore flags mostly older students and higher-level students, not necessarily students who are falling behind their peers.</p></div>
+<div><h3>Reading the flag</h3><p>A flag means a student's change was lower than that of similar students in this file. It is a prompt to look at the student's instruction and context together with teachers, not a prediction, diagnosis or placement decision.</p></div>
+</div>
+<h3 style="margin-top:22px">Limits</h3>
+<ul class="lim">
+<li>Annual changes carry substantial measurement error; one low year is often noise. Prefer students with two or more changes, and look at the trend.</li>
+<li>In a prospective test with one district's records, conditional growth was associated with later state reading scores but did not add significantly beyond the prior year's reading score (Vieytes Cichero, under review). Treat flags as descriptive.</li>
+<li>Estimates are only as good as your file: very small grades or years make the expected values unstable. The tool warns below 150 changes or 15 changes in a grade.</li>
+<li>Designed for ACCESS for ELLs Overall proficiency levels (1.0–6.0). Not affiliated with or endorsed by WIDA.</li>
+</ul>
+<details id="modelbox"><summary>Model coefficients</summary><div class="scroll" style="max-height:none"><table id="coef"><thead><tr><th>Term</th><th>Estimate</th></tr></thead><tbody></tbody></table></div><p class="small" id="fitinfo"></p></details>
+<h3 style="margin-top:22px">Cite this tool</h3>
+<div class="cite">Vieytes Cichero, N. S. (2026). <i>Conditional Growth Calculator for English language proficiency</i> (Version 1.0) [Computer software]. <span id="doi"></span></div>
+</div></section>
+</main>
+<footer class="band"><div class="wrap">Created by Nora S. Vieytes Cichero · <a href="https://orcid.org/0009-0005-8499-1781">ORCID 0009-0005-8499-1781</a> · Free and open source under the MIT License · All calculations run locally in your browser; no student data is transmitted.</div></footer>
+
+<script>
+// CGC core: parsing, interval building, conditional-growth model. No network access, no storage.
+const CGC = (() => {
+  function parseCSV(text) {
+    const rows = []; let row = [], f = '', q = false;
+    text = text.replace(/^﻿/, '');
+    for (let i = 0; i < text.length; i++) {
+      const c = text[i];
+      if (q) {
+        if (c === '"') { if (text[i + 1] === '"') { f += '"'; i++; } else q = false; }
+        else f += c;
+      } else if (c === '"') q = true;
+      else if (c === ',' || c === '\t' || c === ';') { row.push(f); f = ''; }
+      else if (c === '\n' || c === '\r') {
+        if (c === '\r' && text[i + 1] === '\n') i++;
+        row.push(f); f = '';
+        if (row.some(v => v.trim() !== '')) rows.push(row);
+        row = [];
+      } else f += c;
+    }
+    row.push(f); if (row.some(v => v.trim() !== '')) rows.push(row);
+    if (!rows.length) return { header: [], data: [] };
+    const header = rows[0].map(h => h.trim());
+    return { header, data: rows.slice(1).map(r => Object.fromEntries(header.map((h, j) => [h, (r[j] ?? '').trim()]))) };
+  }
+
+  function guessColumns(header) {
+    const find = res => header.find(h => res.some(re => re.test(h))) || '';
+    return {
+      id: find([/^(student[ _]?)?id$/i, /student/i, /research[ _]?id/i, /\bid\b/i]),
+      year: find([/school[ _]?year/i, /^year$/i, /year/i, /^sy$/i]),
+      grade: find([/^grade$/i, /grade/i, /^gr$/i]),
+      level: find([/overall/i, /proficiency/i, /^level$/i, /level/i, /wida/i, /access/i, /elp/i])
+    };
+  }
+
+  // "2022-23", "2022-2023", "SY2023", "2023" -> 2023 (spring/end year)
+  function normYear(v) {
+    const s = String(v).trim();
+    let m = s.match(/(\d{4})\s*[-\/–]\s*(\d{2,4})/);
+    if (m) { const a = +m[1], b = m[2].length === 2 ? Math.floor(a / 100) * 100 + +m[2] : +m[2]; return b; }
+    m = s.match(/(\d{4})/); return m ? +m[1] : NaN;
+  }
+  function normGrade(v) {
+    const s = String(v).trim().toUpperCase();
+    if (/^(K|KG|KN|KINDER|KINDERGARTEN|0K)$/.test(s)) return 0;
+    if (/^(PK|P|PREK|PRE-K|PRE K|-1)$/.test(s)) return -1;
+    const m = s.match(/-?\d+/); if (!m) return NaN;
+    const g = +m[0]; return g >= -1 && g <= 12 ? g : NaN;
+  }
+  function normLevel(v) {
+    const x = parseFloat(String(v).replace(',', '.'));
+    return x >= 1 && x <= 6 ? x : NaN;
+  }
+
+  function buildRecords(data, cols) {
+    const recs = [], skipped = { missing: 0, dup: 0 }, seen = new Set();
+    for (const r of data) {
+      const id = String(r[cols.id] ?? '').trim(), y = normYear(r[cols.year]), g = normGrade(r[cols.grade]), l = normLevel(r[cols.level]);
+      if (!id || isNaN(y) || isNaN(g) || isNaN(l)) { skipped.missing++; continue; }
+      const k = id + '|' + y; if (seen.has(k)) { skipped.dup++; continue; }
+      seen.add(k); recs.push({ id, year: y, grade: g, level: l });
+    }
+    return { recs, skipped };
+  }
+
+  function buildIntervals(recs) {
+    const by = new Map();
+    for (const r of recs) { if (!by.has(r.id)) by.set(r.id, []); by.get(r.id).push(r); }
+    const iv = [];
+    for (const [id, arr] of by) {
+      arr.sort((a, b) => a.year - b.year);
+      for (let i = 1; i < arr.length; i++) {
+        const a = arr[i - 1], b = arr[i];
+        if (b.year - a.year !== 1) continue;
+        iv.push({ id, grade: b.grade, year: b.year, prev: a.level, cur: b.level, delta: b.level - a.level });
+      }
+    }
+    return { iv, students: by };
+  }
+
+  // Least squares via Cholesky on X'X (tiny ridge for safety). Returns beta.
+  function ols(X, y) {
+    const n = X.length, p = X[0].length, A = Array.from({ length: p }, () => new Float64Array(p)), b = new Float64Array(p);
+    for (let i = 0; i < n; i++) { const xi = X[i]; for (let j = 0; j < p; j++) { b[j] += xi[j] * y[i]; for (let k = 0; k <= j; k++) A[j][k] += xi[j] * xi[k]; } }
+    for (let j = 0; j < p; j++) { A[j][j] += 1e-9; for (let k = 0; k < j; k++) A[k][j] = A[j][k]; }
+    const L = Array.from({ length: p }, () => new Float64Array(p));
+    for (let j = 0; j < p; j++) {
+      let s = A[j][j]; for (let k = 0; k < j; k++) s -= L[j][k] ** 2;
+      if (s <= 1e-12) throw new Error('The model could not be estimated: some grades or years have too few students. Try a larger file.');
+      L[j][j] = Math.sqrt(s);
+      for (let i = j + 1; i < p; i++) { let t = A[i][j]; for (let k = 0; k < j; k++) t -= L[i][k] * L[j][k]; L[i][j] = t / L[j][j]; }
+    }
+    const z = new Float64Array(p); for (let i = 0; i < p; i++) { let s = b[i]; for (let k = 0; k < i; k++) s -= L[i][k] * z[k]; z[i] = s / L[i][i]; }
+    const beta = new Float64Array(p); for (let i = p - 1; i >= 0; i--) { let s = z[i]; for (let k = i + 1; k < p; k++) s -= L[k][i] * beta[k]; beta[i] = s / L[i][i]; }
+    return beta;
+  }
+
+  // delta ~ C(grade) + prev + prev^2 + C(year)
+  function fit(iv) {
+    const grades = [...new Set(iv.map(r => r.grade))].sort((a, b) => a - b);
+    const years = [...new Set(iv.map(r => r.year))].sort((a, b) => a - b);
+    const names = ['Intercept', ...grades.slice(1).map(g => 'Grade ' + gl(g)), 'Prior level', 'Prior level²', ...years.slice(1).map(y => 'Year ' + yl(y))];
+    const row = r => [1, ...grades.slice(1).map(g => +(r.grade === g)), r.prev, r.prev * r.prev, ...years.slice(1).map(y => +(r.year === y))];
+    const X = iv.map(row), y = iv.map(r => r.delta);
+    if (iv.length < names.length + 10) throw new Error('Too few year-to-year changes (' + iv.length + ') to estimate the model.');
+    const beta = ols(X, y);
+    const my = y.reduce((a, b) => a + b, 0) / y.length;
+    let sse = 0, sst = 0;
+    iv.forEach((r, i) => { r.expected = X[i].reduce((s, x, j) => s + x * beta[j], 0); r.resid = r.delta - r.expected; sse += r.resid ** 2; sst += (r.delta - my) ** 2; });
+    const sigma = Math.sqrt(sse / (iv.length - names.length));
+    return { beta: [...beta], names, grades, years, r2: 1 - sse / sst, sigma, n: iv.length, p: names.length };
+  }
+
+  function byGrade(iv) {
+    const m = new Map();
+    for (const r of iv) { if (!m.has(r.grade)) m.set(r.grade, []); m.get(r.grade).push(r); }
+    return [...m].sort((a, b) => a[0] - b[0]).map(([g, a]) => {
+      const d = a.map(r => r.delta), mean = d.reduce((s, x) => s + x, 0) / d.length;
+      const sd = Math.sqrt(d.reduce((s, x) => s + (x - mean) ** 2, 0) / Math.max(1, d.length - 1));
+      return { grade: g, n: a.length, mean, se: sd / Math.sqrt(d.length), below: a.filter(r => r.delta < 0.30).length / a.length, prev: a.reduce((s, r) => s + r.prev, 0) / a.length };
+    });
+  }
+
+  function summarize(iv, students, sigma, cutSD) {
+    const by = new Map();
+    for (const r of iv) { if (!by.has(r.id)) by.set(r.id, []); by.get(r.id).push(r); }
+    const out = [];
+    for (const [id, a] of by) {
+      a.sort((x, y) => x.year - y.year);
+      const last = a[a.length - 1], mean = a.reduce((s, r) => s + r.resid, 0) / a.length;
+      const recs = students.get(id), latest = recs[recs.length - 1];
+      out.push({ id, grade: latest.grade, year: latest.year, level: latest.level, k: a.length, lastDelta: last.delta, lastExp: last.expected, lastResid: last.resid, meanResid: mean, z: mean / (sigma / Math.sqrt(a.length)), flag: mean <= cutSD * sigma });
+    }
+    return out.sort((x, y) => x.meanResid - y.meanResid);
+  }
+
+  function gl(g) { return g === 0 ? 'K' : g === -1 ? 'PK' : String(g); }
+  function yl(y) { return (y - 1) + '–' + String(y).slice(2); }
+
+  // Synthetic demo data (not real students), seeded.
+  function demo(seed = 7) {
+    let s = seed >>> 0; const rnd = () => (s = (s * 1664525 + 1013904223) >>> 0) / 4294967296;
+    const nrm = () => { let u = 0, v = 0; while (!u) u = rnd(); v = rnd(); return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v); };
+    const rows = ['student_id,school_year,grade,overall_level'];
+    for (let i = 1; i <= 320; i++) {
+      const g0 = Math.floor(rnd() * 7), y0 = 2019 + Math.floor(rnd() * 3), len = 2 + Math.floor(rnd() * 5), slow = rnd() < 0.15 ? 0.45 : 1;
+      let lv = Math.min(4.5, Math.max(1, 1.4 + 0.35 * g0 + 0.6 * nrm()));
+      for (let t = 0; t < len && g0 + t <= 8; t++) {
+        const obs = Math.min(6, Math.max(1, lv + 0.18 * nrm()));
+        rows.push(`S${String(i).padStart(4, '0')},${y0 + t - 1}-${String(y0 + t).slice(2)},${g0 + t === 0 ? 'K' : g0 + t},${obs.toFixed(1)}`);
+        const gain = slow * Math.max(0, (0.95 - 0.07 * (g0 + t)) * (1 - (lv - 1) / 5.5)) + 0.12 * nrm();
+        lv = Math.min(6, Math.max(1, lv + gain));
+      }
+    }
+    return rows.join('\n');
+  }
+
+  return { parseCSV, guessColumns, buildRecords, buildIntervals, fit, byGrade, summarize, demo, gl, yl, normYear, normGrade };
+})();
+
+
+{
+const $ = id => document.getElementById(id);
+const esc = v => String(v).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const f2 = x => (x < 0 ? '−' : '') + Math.abs(x).toFixed(2);
+let parsed = null, state = null, sortK = 'meanResid', sortD = 1;
+
+function err(msg) { $('err').innerHTML = msg ? '<div class="err">' + esc(msg) + '</div>' : ''; }
+function toast(m) { $('toast').textContent = m; setTimeout(() => { if ($('toast').textContent === m) $('toast').textContent = ''; }, 4000); }
+
+function load(text, label) {
+  err('');
+  parsed = CGC.parseCSV(text);
+  if (parsed.header.length < 4) { err('The file needs at least four columns: student ID, school year, grade and overall level.'); return; }
+  const g = CGC.guessColumns(parsed.header);
+  for (const k of ['id', 'year', 'grade', 'level']) {
+    $('c_' + k).innerHTML = parsed.header.map(h => '<option' + (h === g[k] ? ' selected' : '') + '>' + esc(h) + '</option>').join('');
+  }
+  $('mapbox').hidden = false;
+  $('src').textContent = label ? '· ' + label : '';
+  run();
+}
+
+function run() {
+  if (!parsed) { const t = $('paste').value.trim(); if (t) return load(t, 'pasted data'); err('Add a file, paste rows, or use the sample data.'); return; }
+  const cols = { id: $('c_id').value, year: $('c_year').value, grade: $('c_grade').value, level: $('c_level').value };
+  try {
+    const { recs, skipped } = CGC.buildRecords(parsed.data, cols);
+    const { iv, students } = CGC.buildIntervals(recs);
+    const m = CGC.fit(iv), g = CGC.byGrade(iv);
+    state = { iv, students, m, g };
+    const warn = [];
+    if (skipped.missing) warn.push(skipped.missing + ' rows skipped (missing or out-of-range values).');
+    if (skipped.dup) warn.push(skipped.dup + ' duplicate student-year rows ignored.');
+    if (m.n < 150) warn.push('Only ' + m.n + ' year-to-year changes: expected values will be unstable.');
+    const thin = g.filter(x => x.n < 15).map(x => CGC.gl(x.grade));
+    if (thin.length) warn.push('Few changes for grade ' + thin.join(', ') + '.');
+    err(warn.join(' '));
+    render();
+  } catch (e) { state = null; err(e.message); }
+}
+
+function render() {
+  if (!state) return;
+  const { iv, students, m, g } = state, cut = +$('cut').value;
+  $('cutv').textContent = (cut < 0 ? '−' : '') + Math.abs(cut).toFixed(1);
+  state.rows = CGC.summarize(iv, students, m.sigma, cut);
+  $('k_s').textContent = state.rows.length;
+  $('k_n').textContent = m.n;
+  $('k_r').textContent = Math.round(m.r2 * 100) + '%';
+  $('k_f').textContent = state.rows.filter(r => r.flag).length;
+  const max = Math.max(0.6, ...g.map(x => x.mean + 1.96 * x.se)), pct = v => Math.max(0, Math.min(100, v / max * 100));
+  $('bars').innerHTML = g.map(x => '<div class="bar"><span>' + (x.grade <= 0 ? CGC.gl(x.grade) : 'Gr ' + x.grade) + '</span><div class="track" title="Mean ' + x.mean.toFixed(2) + '"><div class="fill" style="width:' + pct(x.mean) + '%"></div><div class="ci" style="left:' + pct(x.mean - 1.96 * x.se) + '%;width:' + (pct(x.mean + 1.96 * x.se) - pct(x.mean - 1.96 * x.se)) + '%"></div><div class="ref" style="left:' + pct(0.30) + '%"></div></div><span class="v">' + f2(x.mean) + ' <span class="small">n ' + x.n + '<span class="pct"> · ' + Math.round(x.below * 100) + '%</span></span></span></div>').join('');
+  $('coef').tBodies[0].innerHTML = m.names.map((n, i) => '<tr><td>' + esc(n) + '</td><td>' + f2(m.beta[i]) + '</td></tr>').join('');
+  $('fitinfo').textContent = 'OLS on ' + m.n + ' changes, ' + m.p + ' parameters. R² = ' + m.r2.toFixed(3) + '; residual SD = ' + m.sigma.toFixed(3) + ' levels. Reference categories: lowest grade and earliest year in the file.';
+  table();
+}
+
+function table() {
+  if (!state) return;
+  const q = $('q').value.trim().toLowerCase(), only = $('onlyf').checked;
+  let rows = state.rows.filter(r => (!q || r.id.toLowerCase().includes(q)) && (!only || r.flag));
+  rows = rows.slice().sort((a, b) => (a[sortK] > b[sortK] ? 1 : a[sortK] < b[sortK] ? -1 : 0) * sortD);
+  const shown = rows.slice(0, 1000);
+  $('tbl').tBodies[0].innerHTML = shown.map(r => '<tr' + (r.flag ? ' class="flag"' : '') + '><td>' + esc(r.id) + '</td><td>' + CGC.gl(r.grade) + '</td><td>' + r.level.toFixed(1) + '</td><td>' + r.k + (r.k === 1 ? ' <span class="lo">low confidence</span>' : '') + '</td><td>' + f2(r.lastDelta) + '</td><td>' + f2(r.lastExp) + '</td><td>' + f2(r.meanResid) + '</td><td>' + f2(r.meanResid / state.m.sigma) + '</td><td>' + (r.flag ? '<span class="tag">Below expected</span>' : '') + '</td></tr>').join('') || '<tr><td colspan="9">No students match.</td></tr>';
+}
+
+function csv() {
+  const h = 'student_id,latest_grade,latest_year,latest_level,n_changes,last_change,expected_last_change,avg_difference,avg_difference_sd,below_expected';
+  const q = v => /[",\n]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v;
+  return [h, ...state.rows.map(r => [q(r.id), CGC.gl(r.grade), CGC.yl(r.year), r.level.toFixed(1), r.k, r.lastDelta.toFixed(3), r.lastExp.toFixed(3), r.meanResid.toFixed(3), (r.meanResid / state.m.sigma).toFixed(3), r.flag ? 1 : 0].join(','))].join('\n');
+}
+
+$('run').addEventListener('click', () => { const t = $('paste').value.trim(); if (t) { load(t, 'pasted data'); } else run(); });
+$('sample').addEventListener('click', () => { $('paste').value = ''; load(CGC.demo(), 'sample data — synthetic, not real students'); });
+$('file').addEventListener('change', e => { const f = e.target.files[0]; if (f) f.text().then(t => load(t, f.name)); });
+const d = $('drop');
+d.addEventListener('dragover', e => { e.preventDefault(); d.classList.add('on'); });
+d.addEventListener('dragleave', () => d.classList.remove('on'));
+d.addEventListener('drop', e => { e.preventDefault(); d.classList.remove('on'); const f = e.dataTransfer.files[0]; if (f) f.text().then(t => load(t, f.name)); });
+for (const k of ['id', 'year', 'grade', 'level']) $('c_' + k).addEventListener('change', run);
+$('cut').addEventListener('input', render);
+$('q').addEventListener('input', table);
+$('onlyf').addEventListener('change', table);
+for (const th of document.querySelectorAll('#tbl th')) th.addEventListener('click', () => { const k = th.dataset.k; sortD = sortK === k ? -sortD : 1; sortK = k; table(); });
+$('dl').addEventListener('click', () => {
+  if (!state) return;
+  try { const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([csv()], { type: 'text/csv' })); a.download = 'conditional_growth_results.csv'; document.body.appendChild(a); a.click(); a.remove(); toast('If no file appeared, use Copy CSV and paste into a spreadsheet.'); }
+  catch (e) { toast('Download is blocked here; use Copy CSV.'); }
+});
+$('cp').addEventListener('click', () => { if (!state) return; navigator.clipboard.writeText(csv()).then(() => toast('Copied. Paste into a spreadsheet.'), () => toast('Copy was blocked by the browser.')); });
+const DOI = '';
+$('doi').innerHTML = DOI ? '<a href="https://doi.org/' + esc(DOI) + '">https://doi.org/' + esc(DOI) + '</a>' : '';
+load(CGC.demo(), 'sample data — synthetic, not real students');
+}
+</script>
+</body>
+</html>

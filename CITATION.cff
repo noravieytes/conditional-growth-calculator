@@ -1,0 +1,11 @@
+cff-version: 1.2.0
+message: "If you use this tool, please cite it as below."
+title: "Conditional Growth Calculator for English language proficiency"
+version: "1.0.0"
+date-released: "2026-11-24"
+license: MIT
+authors:
+  - family-names: "Vieytes Cichero"
+    given-names: "Nora S."
+    orcid: "https://orcid.org/0009-0005-8499-1781"
+keywords: [multilingual learners, English learners, English language proficiency, growth, educational assessment, ACCESS for ELLs]

@@ -1,0 +1,9 @@
+{
+  "title": "Conditional Growth Calculator for English language proficiency",
+  "upload_type": "software",
+  "description": "Free, browser-based tool that compares each multilingual learner's year-to-year change in English language proficiency (ACCESS for ELLs Overall levels) with the change expected for students in the same grade, at the same prior level and in the same school year, estimated from the user's own data. All computation runs locally; no student data is transmitted.",
+  "creators": [{"name": "Vieytes Cichero, Nora S.", "orcid": "0009-0005-8499-1781"}],
+  "license": "MIT",
+  "keywords": ["multilingual learners", "English learners", "language proficiency growth", "conditional growth", "educational assessment"],
+  "version": "1.0.0"
+}
