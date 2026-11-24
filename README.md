@@ -1,5 +1,9 @@
 # Conditional Growth Calculator for English language proficiency
 
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.24506706.svg)](https://doi.org/10.5281/zenodo.24506706)
+
+**Live tool:** https://noravieytes.github.io/conditional-growth-calculator/
+
 A free, open tool for schools and districts. It compares each multilingual learner's year-to-year change in English language proficiency with the change typical for students in the same grade, at the same prior level, in the same school year, estimated from the district's own records.
 
 **Privacy:** everything runs in the user's browser. No file is uploaded, stored or transmitted.
@@ -25,7 +29,7 @@ Validated against the analysis code of Vieytes Cichero (under review): on the sa
 - Not affiliated with or endorsed by WIDA.
 
 ## Cite
-Vieytes Cichero, N. S. (2026). *Conditional Growth Calculator for English language proficiency* (Version 1.0) [Computer software]. DOI: see the Zenodo badge.
+Vieytes Cichero, N. S. (2026). *Conditional Growth Calculator for English language proficiency* (Version 1.0) [Computer software]. Zenodo. https://doi.org/10.5281/zenodo.24506706
 
 ## License
 MIT. Copyright © 2026 Nora S. Vieytes Cichero.

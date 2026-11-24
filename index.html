@@ -399,7 +399,7 @@ $('dl').addEventListener('click', () => {
   catch (e) { toast('Download is blocked here; use Copy CSV.'); }
 });
 $('cp').addEventListener('click', () => { if (!state) return; navigator.clipboard.writeText(csv()).then(() => toast('Copied. Paste into a spreadsheet.'), () => toast('Copy was blocked by the browser.')); });
-const DOI = '';
+const DOI = '10.5281/zenodo.24506706';
 $('doi').innerHTML = DOI ? '<a href="https://doi.org/' + esc(DOI) + '">https://doi.org/' + esc(DOI) + '</a>' : '';
 load(CGC.demo(), 'sample data — synthetic, not real students');
 }

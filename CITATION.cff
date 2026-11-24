@@ -4,6 +4,9 @@ title: "Conditional Growth Calculator for English language proficiency"
 version: "1.0.0"
 date-released: "2026-11-24"
 license: MIT
+doi: "10.5281/zenodo.24506706"
+url: "https://noravieytes.github.io/conditional-growth-calculator/"
+repository-code: "https://github.com/noravieytes/conditional-growth-calculator"
 authors:
   - family-names: "Vieytes Cichero"
     given-names: "Nora S."
